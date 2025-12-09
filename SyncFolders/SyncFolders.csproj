@@ -7,4 +7,22 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="4.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TestingSetup\Replica\" />
+    <Folder Include="TestingSetup\Source\SubFolder\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestingSetup\Source\ExampleFile.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestingSetup\Source\SubFolder\AnotherExampleFIle.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
