@@ -9,6 +9,6 @@ Console.ReadKey();
 Console.WriteLine("Synchronization started!");
 Console.WriteLine("---------------------------------------------------------");
 
-synchronization.Synchronize("TestingSetup/Source/", "TestingSetup/Replica");
+synchronization.Synchronize("TestingSetup\\Source", "TestingSetup\\Replica");
 
 Console.WriteLine("Synchronization process is now finished!");
