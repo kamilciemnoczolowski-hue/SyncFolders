@@ -13,7 +13,7 @@ namespace SyncFolders.Synchronization
             foreach (string file in filesList)
             {
                 string fileMd5 = GetFileMd5(file);
-                string relativeFileName = file.Replace(pathBase, string.Empty);
+                string relativeFileName = file.Replace(pathBase, string.Empty).TrimStart('\\');
                 filesWithMd5s.Add(relativeFileName, (file, fileMd5));
             }
 

@@ -71,19 +71,28 @@ namespace SyncFolders.Synchronization
                 {
                     // the file we're checking is not present in the 'replica' folder
                     // so we can just copy it without further checking
-                    File.Copy(sourceFileWithHash.Value.FullFileName, Path.Combine(replicaFolderPath, sourceFileWithHash.Key));
+                    string replicatedFilePath = Path.Combine(replicaFolderPath, sourceFileWithHash.Key);
+                    string? replicatedFileDirectoryPath = Path.GetDirectoryName(replicatedFilePath);
+
+                    if (replicatedFileDirectoryPath is not null && !Directory.Exists(replicatedFileDirectoryPath))
+                    {
+                        Directory.CreateDirectory(replicatedFileDirectoryPath);
+                    }
+
+                    File.Copy(sourceFileWithHash.Value.FullFileName, replicatedFilePath);
                 }
             }
 
-            foreach (string replicaFile in replicaFiles)
+            foreach (KeyValuePair<string, (string FullFileName, string Hash)> replicaFileWithHash in replicaFilesWithHashes)
             {
-                // TODO: verify this - I think this will not work and we'll need to do the checking
-                // TODO: on the 'sourceFilesWithHashes' and 'replicaFilesWithHashes'
-                if (!sourceFiles.Contains(replicaFile))
+                if (sourceFilesWithHashes.ContainsKey(replicaFileWithHash.Key))
                 {
-                    // if there is no coresponding file in the 'source' folder we need to remove this file from 'replica'
-                    File.Delete(replicaFile);
+                    // this file is in the 'source' folder and was already updated if necessary - we can just continue
+                    continue;
                 }
+
+                // the file is not present in the 'source' folder so we will remove it from 'replica'
+                File.Delete(replicaFileWithHash.Value.FullFileName);
             }
         }
     }
