@@ -1,14 +1,16 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using SyncFolders.Synchronization;
 
+int sleepInMiliseconds = 60000;
 Synchronization synchronization = new();
-Console.WriteLine("This is a small program that would synchronize a source folder into the replica folder.");
-Console.WriteLine("Click any button to start the synchronization process....");
-Console.WriteLine("---------------------------------------------------------");
-Console.ReadKey();
-Console.WriteLine("Synchronization started!");
-Console.WriteLine("---------------------------------------------------------");
+Console.WriteLine("This is a small program that would synchronize a source folder into the replica folder every minute.");
+Console.WriteLine("------------------------------------------------------------------");
 
-synchronization.Synchronize("TestingSetup\\Source", "TestingSetup\\Replica");
-
-Console.WriteLine("Synchronization process is now finished!");
+while (true)
+{
+    Console.WriteLine("Synchronization started!");
+    synchronization.Synchronize("C:\\tmp\\source", "C:\\tmp\\replica");
+    Console.WriteLine($"Synchronization finished! Waiting for the desired time interval = {sleepInMiliseconds / 1000} seconds...");
+    Console.WriteLine("------------------------------------------------------------------");
+    Thread.Sleep(sleepInMiliseconds);
+}

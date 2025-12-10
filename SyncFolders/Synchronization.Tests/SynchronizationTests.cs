@@ -59,6 +59,37 @@ namespace SyncFolders.Synchronization.Tests
             File.WriteAllText(Path.Combine(subDir4, "file4.txt"), "Last file with some different content updated.");
             #endregion
 
+            #region Create 'source' with some files but also empty directories
+            string sourceWithContentAndEmptyDirectories = Path.Combine(BasePath, SourceWithContentAndEmptyDirectories);
+            Directory.CreateDirectory(sourceWithContentAndEmptyDirectories);
+
+            File.WriteAllText(Path.Combine(sourceWithContentAndEmptyDirectories, "file1.txt"), "Some file content.");
+
+            string subDir5 = Path.Combine(sourceWithContentAndEmptyDirectories, "subfolder");
+            Directory.CreateDirectory(subDir5);
+            File.WriteAllText(Path.Combine(subDir5, "file2.txt"), "Another file with some different content.");
+
+            string subDir6 = Path.Combine(sourceWithContentAndEmptyDirectories, "subfolder2");
+            Directory.CreateDirectory(subDir6);
+
+            string subDir7 = Path.Combine(subDir6, "subfolder3");
+            Directory.CreateDirectory(subDir7);
+            #endregion
+
+            #region Create 'source' with only empty subdirectories
+            string sourceWithOnlyEmptySubDirectories = Path.Combine(BasePath, SourceWithOnlyEmptySubDirectories);
+            Directory.CreateDirectory(sourceWithOnlyEmptySubDirectories);
+
+            string subDir8 = Path.Combine(sourceWithOnlyEmptySubDirectories, "subfolder");
+            Directory.CreateDirectory(subDir8);
+
+            string subDir9 = Path.Combine(sourceWithOnlyEmptySubDirectories, "subfolder2");
+            Directory.CreateDirectory(subDir9);
+
+            string subDir10 = Path.Combine(subDir9, "subfolder3");
+            Directory.CreateDirectory(subDir10);
+            #endregion
+
             #region Create an empty 'source' folder
             string sourceEmpty = Path.Combine(BasePath, SourceEmpty);
             Directory.CreateDirectory(sourceEmpty);
@@ -75,7 +106,7 @@ namespace SyncFolders.Synchronization.Tests
             File.WriteAllText(Path.Combine(subDirReplica, "file2.txt"), "Another file with some different content.");
             #endregion
 
-            #region Create 'replica' with more files
+            #region Create 'replica' with some more files
             string replicaWithMoreContent = Path.Combine(BasePath, ReplicaWithMoreContent);
             Directory.CreateDirectory(replicaWithMoreContent);
 
@@ -86,6 +117,37 @@ namespace SyncFolders.Synchronization.Tests
             File.WriteAllText(Path.Combine(subDirReplica2, "file2.txt"), "Another file with some different content.");
             File.WriteAllText(Path.Combine(subDirReplica2, "file3.txt"), "Yet another file with some different content.");
             File.WriteAllText(Path.Combine(subDirReplica2, "file4.txt"), "Last file with some different content.");
+            #endregion
+
+            #region Create 'replica' with some files but also empty directories
+            string replicaWithContentAndEmptyDirectories = Path.Combine(BasePath, ReplicaWithContentAndEmptyDirectories);
+            Directory.CreateDirectory(replicaWithContentAndEmptyDirectories);
+
+            File.WriteAllText(Path.Combine(replicaWithContentAndEmptyDirectories, "file1.txt"), "Some file content.");
+
+            string subDirReplica3 = Path.Combine(replicaWithContentAndEmptyDirectories, "subfolder");
+            Directory.CreateDirectory(subDirReplica3);
+            File.WriteAllText(Path.Combine(subDirReplica3, "file2.txt"), "Another file with some different content.");
+
+            string subDirReplica4 = Path.Combine(subDirReplica3, "subfolder2");
+            Directory.CreateDirectory(subDirReplica4);
+
+            string subDirReplica5 = Path.Combine(subDirReplica4, "subfolder3");
+            Directory.CreateDirectory(subDirReplica5);
+            #endregion
+
+            #region Create 'replica' with only empty subdirectories
+            string replicaWithOnlyEmptySubdirectories = Path.Combine(BasePath, ReplicaWithOnlyEmptySubDirectories);
+            Directory.CreateDirectory(replicaWithOnlyEmptySubdirectories);
+
+            string subDirReplica6 = Path.Combine(replicaWithOnlyEmptySubdirectories, "subfolder");
+            Directory.CreateDirectory(subDirReplica6);
+
+            string subDirReplica7 = Path.Combine(subDirReplica6, "subfolder2");
+            Directory.CreateDirectory(subDirReplica7);
+
+            string subDirReplica8 = Path.Combine(subDirReplica7, "subfolder3");
+            Directory.CreateDirectory(subDirReplica8);
             #endregion
 
             #region Create an empty 'replica' folder
@@ -156,16 +218,28 @@ namespace SyncFolders.Synchronization.Tests
             List<string> sourceFiles = Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories).ToList();
             List<string> replicaFiles = Directory.Exists(replicaPath) ? Directory.GetFiles(replicaPath, "*", SearchOption.AllDirectories).ToList() : [];
 
+            List<string> sourceSubDirectoriesList = Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories).ToList();
+            List<string> replicaSubDirectoriesList = Directory.Exists(replicaPath) ? Directory.GetDirectories(replicaPath, "*", SearchOption.AllDirectories).ToList() : [];
+
+            Dictionary<string, (string FullFileName, string Hash)> sourceFilesWithHashes = Md5Helper.CalculateMd5HashesForFiles(sourceFiles, sourcePath);
+            Dictionary<string, (string FullFileName, string Hash)> replicaFilesWithHashes = Md5Helper.CalculateMd5HashesForFiles(replicaFiles, replicaPath);
+
+            Dictionary<string, string> sourceSubDirectories = SubDirectoriesHelper.CreateSubDirectoriesDictonary(sourceSubDirectoriesList, sourcePath);
+            Dictionary<string, string> replicaSubDirectories = SubDirectoriesHelper.CreateSubDirectoriesDictonary(replicaSubDirectoriesList, replicaPath);
+
             // assert
             Assert.That(sourceFiles.Count, Is.EqualTo(replicaFiles.Count));
-
-            Dictionary<string, (string FullFileName, string Hash)> sourceFilesWithHashes = Md5Helper.CalculateMd5HashesForFiles(sourceFiles, sourceWithContent);
-            Dictionary<string, (string FullFileName, string Hash)> replicaFilesWithHashes = Md5Helper.CalculateMd5HashesForFiles(replicaFiles, replica);
+            Assert.That(sourceSubDirectories.Count, Is.EqualTo(replicaSubDirectories.Count));
 
             foreach (var fileWithHash in sourceFilesWithHashes)
             {
                 (string FullFileName, string Hash) = replicaFilesWithHashes[fileWithHash.Key];
                 Assert.That(fileWithHash.Value.Hash, Is.EqualTo(Hash));
+            }
+
+            foreach (KeyValuePair<string, string> sourceSubDirectory in sourceSubDirectories)
+            {
+                Assert.That(replicaSubDirectories.ContainsKey(sourceSubDirectory.Key), Is.True);
             }
         }
 
@@ -206,11 +280,15 @@ namespace SyncFolders.Synchronization.Tests
         private static string SourceWithContentUpdated = "SourceWithContentUpdated";
         private static string SourceWithMoreContent = "SourceWithMoreContent";
         private static string SourceWithMoreContentUpdated = "SourceWithMoreContentUpdated";
+        private static string SourceWithContentAndEmptyDirectories = "SourceWithContentAndEmptyDirectories";
+        private static string SourceWithOnlyEmptySubDirectories = "SourceWithOnlyEmptySubDirectories";
         private static string SourceNotExisting = "SourceNotExisting";
         private static string SourceEmpty = "SourceEmpty";
 
         private static string ReplicaWithContent = "ReplicaWithContent";
         private static string ReplicaWithMoreContent = "ReplicaWithMoreContent";
+        private static string ReplicaWithContentAndEmptyDirectories = "ReplicaWithContentAndEmptyDirectories";
+        private static string ReplicaWithOnlyEmptySubDirectories = "ReplicaWithOnlyEmptySubDirectories";
         private static string ReplicaNotExisting = "ReplicaNotExisting";
         private static string ReplicaEmpty = "ReplicaEmpty";
 
@@ -226,6 +304,22 @@ namespace SyncFolders.Synchronization.Tests
             new object[] { SourceWithMoreContent, ReplicaEmpty },
             new object[] { SourceWithContentUpdated, ReplicaWithContent },
             new object[] { SourceWithMoreContentUpdated, ReplicaWithMoreContent },
+            new object[] { SourceWithContentAndEmptyDirectories, ReplicaWithContentAndEmptyDirectories },
+            new object[] { SourceWithContentAndEmptyDirectories, ReplicaWithContent },
+            new object[] { SourceWithContentAndEmptyDirectories, ReplicaWithMoreContent },
+            new object[] { SourceWithContentAndEmptyDirectories, ReplicaNotExisting },
+            new object[] { SourceWithContentAndEmptyDirectories, ReplicaEmpty },
+            new object[] { SourceWithContentAndEmptyDirectories, ReplicaWithOnlyEmptySubDirectories },
+            new object[] { SourceWithContent, ReplicaWithContentAndEmptyDirectories },
+            new object[] { SourceWithMoreContent, ReplicaWithContentAndEmptyDirectories },
+            new object[] { SourceWithContent, ReplicaWithOnlyEmptySubDirectories },
+            new object[] { SourceWithMoreContent, ReplicaWithOnlyEmptySubDirectories },
+            new object[] { SourceWithOnlyEmptySubDirectories, ReplicaWithOnlyEmptySubDirectories },
+            new object[] { SourceWithOnlyEmptySubDirectories, ReplicaWithContentAndEmptyDirectories },
+            new object[] { SourceWithOnlyEmptySubDirectories, ReplicaWithContent },
+            new object[] { SourceWithOnlyEmptySubDirectories, ReplicaWithMoreContent },
+            new object[] { SourceWithOnlyEmptySubDirectories, ReplicaNotExisting },
+            new object[] { SourceWithOnlyEmptySubDirectories, ReplicaEmpty },
         };
 
         public static readonly object[] TestCasesWhenSourceDontExist =
@@ -234,6 +328,7 @@ namespace SyncFolders.Synchronization.Tests
             new object[] { SourceNotExisting, ReplicaWithMoreContent },
             new object[] { SourceNotExisting, ReplicaNotExisting },
             new object[] { SourceNotExisting, ReplicaEmpty },
+            new object[] { SourceNotExisting, ReplicaWithContentAndEmptyDirectories },
         };
 
         public static readonly object[] TestCasesWhenSourceEmpty =
@@ -242,6 +337,7 @@ namespace SyncFolders.Synchronization.Tests
             new object[] { SourceEmpty, ReplicaWithMoreContent },
             new object[] { SourceEmpty, ReplicaNotExisting },
             new object[] { SourceEmpty, ReplicaEmpty },
+            new object[] { SourceEmpty, ReplicaWithContentAndEmptyDirectories },
         };
 
         private static readonly string BasePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
