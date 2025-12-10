@@ -56,8 +56,8 @@ namespace SyncFolders.Synchronization
             // we have at least 1 file in the 'source' folder and we'll need to perform the actual synchronization
             List<string> replicaFiles = Directory.GetFiles(replicaFolderPath, "*", SearchOption.AllDirectories).ToList();
 
-            Dictionary<string, string> sourceFilesWithHashes = Md5Helper.CalculateMd5HashesForFiles(sourceFiles);
-            Dictionary<string, string> replicaFilesWithHashes = Md5Helper.CalculateMd5HashesForFiles(replicaFiles);
+            Dictionary<string, (string fullFileName, string hash)> sourceFilesWithHashes = Md5Helper.CalculateMd5HashesForFiles(sourceFiles, sourceFolderPath);
+            Dictionary<string, (string fullFileName, string hash)> replicaFilesWithHashes = Md5Helper.CalculateMd5HashesForFiles(replicaFiles, replicaFolderPath);
 
             foreach (var sourceFileWithHash in sourceFilesWithHashes)
             {

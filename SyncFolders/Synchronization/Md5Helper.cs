@@ -7,13 +7,14 @@ namespace SyncFolders.Synchronization
 {
     public static class Md5Helper
     {
-        public static Dictionary<string, string> CalculateMd5HashesForFiles(List<string> filesList)
+        public static Dictionary<string, (string fullFileName, string hash)> CalculateMd5HashesForFiles(List<string> filesList, string pathBase)
         {
-            Dictionary<string, string> filesWithMd5s = [];
+            Dictionary<string, (string fullFileName, string hash)> filesWithMd5s = [];
             foreach (string file in filesList)
             {
                 string fileMd5 = GetFileMd5(file);
-                filesWithMd5s.Add(file, fileMd5);
+                string relativeFileName = file.Replace(pathBase, string.Empty);
+                filesWithMd5s.Add(relativeFileName, (file, fileMd5));
             }
 
             return filesWithMd5s;

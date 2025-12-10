@@ -11,36 +11,87 @@ namespace SyncFolders.Synchronization.Tests
         [SetUp]
         public void SetUp()
         {
-            // Create temporary source folder with some files and subdirectories inside
-            string basePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            m_sourceWithContent = Path.Combine(basePath, "SourceWithContent");
-            Directory.CreateDirectory(m_sourceWithContent);
+            #region Create 'source' with some files
+            string sourceWithContent = Path.Combine(BasePath, SourceWithContent);
+            Directory.CreateDirectory(sourceWithContent);
             
-            File.WriteAllText(Path.Combine(m_sourceWithContent, "file1.txt"), "Some file content.");
+            File.WriteAllText(Path.Combine(sourceWithContent, "file1.txt"), "Some file content.");
 
-            string subDir = Path.Combine(m_sourceWithContent, "subfolder");
+            string subDir = Path.Combine(sourceWithContent, "subfolder");
             Directory.CreateDirectory(subDir);
             File.WriteAllText(Path.Combine(subDir, "file2.txt"), "Another file with some different content.");
+            #endregion
 
-            // Create a non-existing source folder path
-            m_sourceNotExisting = Path.Combine(basePath, "SourceNotExisting");
+            #region Create 'source' with some updated files
+            string sourceWithContentUpdated = Path.Combine(BasePath, SourceWithContentUpdated);
+            Directory.CreateDirectory(sourceWithContentUpdated);
 
-            // Create an empty source folder
-            m_sourceEmpty = Path.Combine(basePath, "SourceEmpty");
-            Directory.CreateDirectory(m_sourceEmpty);
+            File.WriteAllText(Path.Combine(sourceWithContentUpdated, "file1.txt"), "Some file content updated.");
 
-            // Create a path for replica with content
-            m_replicaToBeFilledWithContent = Path.Combine(basePath, "ReplicaWithContent");
+            string subDir2 = Path.Combine(sourceWithContentUpdated, "subfolder");
+            Directory.CreateDirectory(subDir2);
+            File.WriteAllText(Path.Combine(subDir2, "file2.txt"), "Another file with some different content updated.");
+            #endregion
 
-            // Create a replica path that should not exist
-            m_replicaThatShouldNotExist = Path.Combine(basePath, "ReplicaThatShouldNotExist");
-            Directory.CreateDirectory(m_replicaThatShouldNotExist);
-            File.WriteAllText(Path.Combine(m_replicaThatShouldNotExist, "fileReplica1.txt"), "Some file content.");
+            #region Create 'source' with more files
+            string sourceWithMoreContent = Path.Combine(BasePath, SourceWithMoreContent);
+            Directory.CreateDirectory(sourceWithMoreContent);
 
-            // Create a replica path that should be empty
-            m_replicaThatShouldBeEmpty = Path.Combine(basePath, "ReplicaThatShouldBeEmpty");
-            Directory.CreateDirectory(m_replicaThatShouldBeEmpty);
-            File.WriteAllText(Path.Combine(m_replicaThatShouldBeEmpty, "fileReplica1.txt"), "Some file content.");
+            File.WriteAllText(Path.Combine(sourceWithMoreContent, "file1.txt"), "Some file content.");
+
+            string subDir3 = Path.Combine(sourceWithMoreContent, "subfolder");
+            Directory.CreateDirectory(subDir3);
+            File.WriteAllText(Path.Combine(subDir3, "file2.txt"), "Another file with some different content.");
+            File.WriteAllText(Path.Combine(subDir3, "file3.txt"), "Yet another file with some different content.");
+            File.WriteAllText(Path.Combine(subDir3, "file4.txt"), "Last file with some different content.");
+            #endregion
+
+            #region Create 'source' with more updated files
+            string sourceWithMoreContentUpdated = Path.Combine(BasePath, SourceWithMoreContentUpdated);
+            Directory.CreateDirectory(sourceWithMoreContentUpdated);
+
+            File.WriteAllText(Path.Combine(sourceWithMoreContentUpdated, "file1.txt"), "Some file content updated.");
+
+            string subDir4 = Path.Combine(sourceWithMoreContentUpdated, "subfolder");
+            Directory.CreateDirectory(subDir4);
+            File.WriteAllText(Path.Combine(subDir4, "file2.txt"), "Another file with some different content updated.");
+            File.WriteAllText(Path.Combine(subDir4, "file3.txt"), "Yet another file with some different content updated.");
+            File.WriteAllText(Path.Combine(subDir4, "file4.txt"), "Last file with some different content updated.");
+            #endregion
+
+            #region Create an empty 'source' folder
+            string sourceEmpty = Path.Combine(BasePath, SourceEmpty);
+            Directory.CreateDirectory(sourceEmpty);
+            #endregion
+
+            #region Create 'replica' with some files
+            string replicaWithContent = Path.Combine(BasePath, ReplicaWithContent);
+            Directory.CreateDirectory(replicaWithContent);
+
+            File.WriteAllText(Path.Combine(replicaWithContent, "file1.txt"), "Some file content.");
+
+            string subDirReplica = Path.Combine(replicaWithContent, "subfolder");
+            Directory.CreateDirectory(subDirReplica);
+            File.WriteAllText(Path.Combine(subDirReplica, "file2.txt"), "Another file with some different content.");
+            #endregion
+
+            #region Create 'replica' with more files
+            string replicaWithMoreContent = Path.Combine(BasePath, ReplicaWithMoreContent);
+            Directory.CreateDirectory(replicaWithMoreContent);
+
+            File.WriteAllText(Path.Combine(replicaWithMoreContent, "file1.txt"), "Some file content.");
+
+            string subDirReplica2 = Path.Combine(replicaWithMoreContent, "subfolder");
+            Directory.CreateDirectory(subDirReplica2);
+            File.WriteAllText(Path.Combine(subDirReplica2, "file2.txt"), "Another file with some different content.");
+            File.WriteAllText(Path.Combine(subDirReplica2, "file3.txt"), "Yet another file with some different content.");
+            File.WriteAllText(Path.Combine(subDirReplica2, "file4.txt"), "Last file with some different content.");
+            #endregion
+
+            #region Create an empty 'replica' folder
+            string replicaEmpty = Path.Combine(BasePath, ReplicaEmpty);
+            Directory.CreateDirectory(replicaEmpty);
+            #endregion
 
             // create a synchronization object
             m_synchronization = new Synchronization();
@@ -49,91 +100,134 @@ namespace SyncFolders.Synchronization.Tests
         [TearDown]
         public void TearDown()
         {
-            // Clean up after tests
-            if (Directory.Exists(m_sourceWithContent))
-                Directory.Delete(m_sourceWithContent, true);
+            #region Clean up after tests
+            string sourceWitContentPath = Path.Combine(BasePath, SourceWithContent);
+            if (Directory.Exists(sourceWitContentPath))
+                Directory.Delete(sourceWitContentPath, true);
 
-            if (Directory.Exists(m_sourceNotExisting))
-                Directory.Delete(m_sourceNotExisting, true);
+            string sourceWitContentUpdatedPath = Path.Combine(BasePath, SourceWithContentUpdated);
+            if (Directory.Exists(sourceWitContentUpdatedPath))
+                Directory.Delete(sourceWitContentUpdatedPath, true);
 
-            if (Directory.Exists(m_sourceEmpty))
-                Directory.Delete(m_sourceEmpty, true);
+            string sourceWitMoreContentPath = Path.Combine(BasePath, SourceWithMoreContent);
+            if (Directory.Exists(sourceWitMoreContentPath))
+                Directory.Delete(sourceWitMoreContentPath, true);
 
-            if (Directory.Exists(m_replicaToBeFilledWithContent))
-                Directory.Delete(m_replicaToBeFilledWithContent, true);
+            string sourceWitMoreContentUpdatedPath = Path.Combine(BasePath, SourceWithMoreContentUpdated);
+            if (Directory.Exists(sourceWitMoreContentUpdatedPath))
+                Directory.Delete(sourceWitMoreContentUpdatedPath, true);
+
+            string sourceNotExistingPath = Path.Combine(BasePath, SourceNotExisting);
+            if (Directory.Exists(sourceNotExistingPath))
+                Directory.Delete(sourceNotExistingPath, true);
+
+            string sourceEmptyPath = Path.Combine(BasePath, SourceEmpty);
+            if (Directory.Exists(sourceEmptyPath))
+                Directory.Delete(sourceEmptyPath, true);
+
+            string replicaWithContentPath = Path.Combine(BasePath, ReplicaWithContent);
+            if (Directory.Exists(replicaWithContentPath))
+                Directory.Delete(replicaWithContentPath, true);
+
+            string replicaWithMoreContentPath = Path.Combine(BasePath, ReplicaWithMoreContent);
+            if (Directory.Exists(replicaWithMoreContentPath))
+                Directory.Delete(replicaWithMoreContentPath, true);
+
+            string replicaNotExistingPath = Path.Combine(BasePath, ReplicaNotExisting);
+            if (Directory.Exists(replicaNotExistingPath))
+                Directory.Delete(replicaNotExistingPath, true);
+
+            string replicaEmptyPath = Path.Combine(BasePath, ReplicaEmpty);
+            if (Directory.Exists(replicaEmptyPath))
+                Directory.Delete(replicaEmptyPath, true);
+            #endregion
         }
 
-        [Test]
-        public void Test_Synchronization_BothWithContentButSourceWithMoreFiles()
+        [TestCaseSource(nameof(TestCasesWhenSourceFolderExist))]
+        public void Test_Synchronization_SourceWithContent(string sourceWithContent, string replica)
         {
-            // act
-            m_synchronization.Synchronize(m_sourceWithContent, m_replicaToBeFilledWithContent);
+            // setup
+            string sourcePath = Path.Combine(BasePath, sourceWithContent);
+            string replicaPath = Path.Combine(BasePath, replica);
 
-            List<string> sourceFiles = Directory.GetFiles(m_sourceWithContent, "*", SearchOption.AllDirectories).ToList();
-            List<string> replicaFiles = Directory.Exists(m_replicaToBeFilledWithContent) ? Directory.GetFiles(m_replicaToBeFilledWithContent, "*", SearchOption.AllDirectories).ToList() : [];
+            // act
+            m_synchronization.Synchronize(sourcePath, replicaPath);
+
+            List<string> sourceFiles = Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories).ToList();
+            List<string> replicaFiles = Directory.Exists(replicaPath) ? Directory.GetFiles(replicaPath, "*", SearchOption.AllDirectories).ToList() : [];
 
             // assert
             Assert.That(sourceFiles.Count, Is.EqualTo(replicaFiles.Count));
 
-            Dictionary<string, string> sourceFilesWithHashes = Md5Helper.CalculateMd5HashesForFiles(sourceFiles);
-            Dictionary<string, string> replicaFilesWithHashes = Md5Helper.CalculateMd5HashesForFiles(replicaFiles);
+            Dictionary<string, (string FullFileName, string Hash)> sourceFilesWithHashes = Md5Helper.CalculateMd5HashesForFiles(sourceFiles, sourceWithContent);
+            Dictionary<string, (string FullFileName, string Hash)> replicaFilesWithHashes = Md5Helper.CalculateMd5HashesForFiles(replicaFiles, replica);
 
             foreach (var fileWithHash in sourceFilesWithHashes)
             {
-                string replicaHashForFile = replicaFilesWithHashes[fileWithHash.Key];
-                Assert.That(fileWithHash.Value, Is.EqualTo(replicaHashForFile));
+                (string FullFileName, string Hash) = replicaFilesWithHashes[fileWithHash.Key];
+                Assert.That(fileWithHash.Value.Hash, Is.EqualTo(Hash));
             }
         }
 
-        [Test]
-        public void Test_Synchronization_BothWithContentButReplicaWithMoreFiles()
-        {
-        }
-
-        [Test]
-        public void Test_Synchronization_BothWithEqualContent()
-        {
-        }
-
-        [Test]
-        public void Test_Synchronization_BothWithContentButFilesWereUpdatedSoReplicaNeedToBeSynchronized()
-        {
-        }
-
-        [Test]
-        public void Test_Synchronization_SourceNotExisting()
+        [TestCase("SourceNotExisting", "ReplicaWithContent")]
+        [TestCase("SourceNotExisting", "ReplicaWithMoreContent")]
+        [TestCase("SourceNotExisting", "ReplicaNotExisting")]
+        [TestCase("SourceNotExisting", "ReplicaEmpty")]
+        public void Test_Synchronization_SourceNotExisting(string sourceNotExistingPath, string replicaPath)
         {
             // act
-            m_synchronization.Synchronize(m_sourceNotExisting, m_replicaThatShouldNotExist);
+            m_synchronization.Synchronize(sourceNotExistingPath, replicaPath);
 
             // assert
-            Assert.That(Directory.Exists(m_sourceNotExisting), Is.EqualTo(false));
-            Assert.That(Directory.Exists(m_replicaThatShouldNotExist), Is.EqualTo(false));
+            Assert.That(Directory.Exists(sourceNotExistingPath), Is.EqualTo(false));
+            Assert.That(Directory.Exists(replicaPath), Is.EqualTo(false));
         }
 
-        [Test]
-        public void Test_Synchronization_SourceEmpty()
+        [TestCase("SourceEmpty", "ReplicaWithContent")]
+        [TestCase("SourceEmpty", "ReplicaWithMoreContent")]
+        [TestCase("SourceEmpty", "ReplicaNotExisting")]
+        [TestCase("SourceEmpty", "ReplicaEmpty")]
+        public void Test_Synchronization_SourceEmpty(string sourceEmptyPath, string replicaPath)
         {
             // act
-            m_synchronization.Synchronize(m_sourceEmpty, m_replicaThatShouldBeEmpty);
+            m_synchronization.Synchronize(sourceEmptyPath, replicaPath);
 
-            List<string> sourceFiles = Directory.GetFiles(m_sourceWithContent, "*", SearchOption.AllDirectories).ToList();
-            List<string> replicaFiles = Directory.GetFiles(m_replicaToBeFilledWithContent, "*", SearchOption.AllDirectories).ToList();
+            List<string> sourceFiles = Directory.GetFiles(sourceEmptyPath, "*", SearchOption.AllDirectories).ToList();
+            List<string> replicaFiles = Directory.GetFiles(replicaPath, "*", SearchOption.AllDirectories).ToList();
 
             // assert
             Assert.That(sourceFiles.Count, Is.EqualTo(0));
             Assert.That(replicaFiles.Count, Is.EqualTo(0));
         }
 
-        
+        private static string SourceWithContent = "SourceWithContent";
+        private static string SourceWithContentUpdated = "SourceWithContentUpdated";
+        private static string SourceWithMoreContent = "SourceWithMoreContent";
+        private static string SourceWithMoreContentUpdated = "SourceWithMoreContentUpdated";
+        private static string SourceNotExisting = "SourceNotExisting";
+        private static string SourceEmpty = "SourceEmpty";
 
-        private string m_sourceWithContent;
-        private string m_sourceNotExisting;
-        private string m_sourceEmpty;
+        private static string ReplicaWithContent = "ReplicaWithContent";
+        private static string ReplicaWithMoreContent = "ReplicaWithMoreContent";
+        private static string ReplicaNotExisting = "ReplicaNotExisting";
+        private static string ReplicaEmpty = "ReplicaEmpty";
 
-        private string m_replicaToBeFilledWithContent;
-        private string m_replicaThatShouldNotExist;
-        private string m_replicaThatShouldBeEmpty;
+        public static readonly object[] TestCasesWhenSourceFolderExist =
+        {
+            new object[] { SourceWithContent, ReplicaWithContent },
+            new object[] { SourceWithMoreContent, ReplicaWithContent },
+            new object[] { SourceWithContent, ReplicaWithMoreContent },
+            new object[] { SourceWithMoreContent, ReplicaWithMoreContent },
+            new object[] { SourceWithContent, ReplicaNotExisting },
+            new object[] { SourceWithContent, ReplicaEmpty },
+            new object[] { SourceWithMoreContent, ReplicaNotExisting },
+            new object[] { SourceWithMoreContent, ReplicaEmpty },
+            new object[] { SourceWithContentUpdated, ReplicaWithContent },
+            new object[] { SourceWithMoreContentUpdated, ReplicaWithMoreContent },
+        };
+
+        private static readonly string BasePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
         private Synchronization m_synchronization;
     }
 }
