@@ -169,30 +169,32 @@ namespace SyncFolders.Synchronization.Tests
             }
         }
 
-        [TestCase("SourceNotExisting", "ReplicaWithContent")]
-        [TestCase("SourceNotExisting", "ReplicaWithMoreContent")]
-        [TestCase("SourceNotExisting", "ReplicaNotExisting")]
-        [TestCase("SourceNotExisting", "ReplicaEmpty")]
-        public void Test_Synchronization_SourceNotExisting(string sourceNotExistingPath, string replicaPath)
+        [TestCaseSource(nameof(TestCasesWhenSourceDontExist))]
+        public void Test_Synchronization_SourceNotExisting(string sourceNotExisting, string replica)
         {
+            // setup
+            string sourcePath = Path.Combine(BasePath, sourceNotExisting);
+            string replicaPath = Path.Combine(BasePath, replica);
+
             // act
-            m_synchronization.Synchronize(sourceNotExistingPath, replicaPath);
+            m_synchronization.Synchronize(sourcePath, replicaPath);
 
             // assert
-            Assert.That(Directory.Exists(sourceNotExistingPath), Is.EqualTo(false));
+            Assert.That(Directory.Exists(sourcePath), Is.EqualTo(false));
             Assert.That(Directory.Exists(replicaPath), Is.EqualTo(false));
         }
 
-        [TestCase("SourceEmpty", "ReplicaWithContent")]
-        [TestCase("SourceEmpty", "ReplicaWithMoreContent")]
-        [TestCase("SourceEmpty", "ReplicaNotExisting")]
-        [TestCase("SourceEmpty", "ReplicaEmpty")]
-        public void Test_Synchronization_SourceEmpty(string sourceEmptyPath, string replicaPath)
+        [TestCaseSource(nameof(TestCasesWhenSourceEmpty))]
+        public void Test_Synchronization_SourceEmpty(string sourceEmpty, string replica)
         {
-            // act
-            m_synchronization.Synchronize(sourceEmptyPath, replicaPath);
+            // setup
+            string sourcePath = Path.Combine(BasePath, sourceEmpty);
+            string replicaPath = Path.Combine(BasePath, replica);
 
-            List<string> sourceFiles = Directory.GetFiles(sourceEmptyPath, "*", SearchOption.AllDirectories).ToList();
+            // act
+            m_synchronization.Synchronize(sourcePath, replicaPath);
+
+            List<string> sourceFiles = Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories).ToList();
             List<string> replicaFiles = Directory.GetFiles(replicaPath, "*", SearchOption.AllDirectories).ToList();
 
             // assert
@@ -224,6 +226,22 @@ namespace SyncFolders.Synchronization.Tests
             new object[] { SourceWithMoreContent, ReplicaEmpty },
             new object[] { SourceWithContentUpdated, ReplicaWithContent },
             new object[] { SourceWithMoreContentUpdated, ReplicaWithMoreContent },
+        };
+
+        public static readonly object[] TestCasesWhenSourceDontExist =
+        {
+            new object[] { SourceNotExisting, ReplicaWithContent },
+            new object[] { SourceNotExisting, ReplicaWithMoreContent },
+            new object[] { SourceNotExisting, ReplicaNotExisting },
+            new object[] { SourceNotExisting, ReplicaEmpty },
+        };
+
+        public static readonly object[] TestCasesWhenSourceEmpty =
+        {
+            new object[] { SourceEmpty, ReplicaWithContent },
+            new object[] { SourceEmpty, ReplicaWithMoreContent },
+            new object[] { SourceEmpty, ReplicaNotExisting },
+            new object[] { SourceEmpty, ReplicaEmpty },
         };
 
         private static readonly string BasePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
