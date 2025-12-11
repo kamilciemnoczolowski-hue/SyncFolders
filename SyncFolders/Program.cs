@@ -1,7 +1,15 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using Serilog;
 using SyncFolders.Synchronization;
 
 int sleepInMiliseconds = 60000;
+
+// logger configuration
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .WriteTo.File("c://tmp/syncLoggger.txt", rollOnFileSizeLimit: true, fileSizeLimitBytes: 10 * 1024 * 1024) // rolling file size - limit set to 10MB
+    .CreateLogger();
+
 Synchronization synchronization = new();
 Console.WriteLine("This is a small program that would synchronize a source folder into the replica folder every minute.");
 Console.WriteLine("------------------------------------------------------------------");

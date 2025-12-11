@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -154,6 +155,12 @@ namespace SyncFolders.Synchronization.Tests
             string replicaEmpty = Path.Combine(BasePath, ReplicaEmpty);
             Directory.CreateDirectory(replicaEmpty);
             #endregion
+
+            // logger configuration (while testing I just want to log to console)
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .CreateLogger();
 
             // create a synchronization object
             m_synchronization = new Synchronization();

@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using Serilog;
+using Serilog.Core;
 
 namespace SyncFolders.Synchronization
 {
@@ -30,6 +32,7 @@ namespace SyncFolders.Synchronization
             {
                 // create the 'replica' folder if needed
                 Directory.CreateDirectory(replicaFolderPath);
+                Log.Information("Create the 'replica' folder as it didn't exist.");
             }
 
             // handle file synchronization
@@ -56,7 +59,10 @@ namespace SyncFolders.Synchronization
             // if source directory does not exist we can just check if the replica directory exist
             // and if that would be the case then just remove it
             if (Directory.Exists(replicaFolderPath))
+            {
                 Directory.Delete(replicaFolderPath, true);
+                Log.Information("Deleted the 'replica' folder with all it's content as the 'source' doesn't exist.");
+            }
         }
 
         private void SynchronizeWhenNoFilesOrSubDirectoriesInSource(string replicaFolderPath)
@@ -67,16 +73,27 @@ namespace SyncFolders.Synchronization
             {
                 // if the replica folder is not just we can just create it and finish
                 Directory.CreateDirectory(replicaFolderPath);
+                Log.Information("Create the 'replica' folder as it didn't exist.");
                 return;
             }
 
             // if the replica folder is there we just need to take all files and directories from it and remove them
-            Directory.GetFiles(replicaFolderPath, "*", SearchOption.AllDirectories).ToList().ForEach(File.Delete);
+            List<string> filePaths = Directory.GetFiles(replicaFolderPath, "*", SearchOption.AllDirectories).ToList();
+
+            foreach (string filePath in filePaths)
+            {
+                File.Delete(filePath);
+                Log.Information($"File in path '{filePath}' was deleted in the 'replica' folder.");
+            }
+
             List<string> subDirectoriesToBeRemoved = Directory.GetDirectories(replicaFolderPath, "*", SearchOption.AllDirectories).ToList();
             foreach (string subDirectory in subDirectoriesToBeRemoved)
             {
                 if (Directory.Exists(subDirectory))
+                {
                     Directory.Delete(subDirectory, true);
+                    Log.Information($"Directory in path '{subDirectory}' was deleted in the 'replica' folder.");
+                }
             }
 
             return;
@@ -98,7 +115,9 @@ namespace SyncFolders.Synchronization
                     }
 
                     // check some is different so we want to override the version in 'replica' folder with the one from 'source'
-                    File.Copy(sourceFileWithHash.Value.FullFileName, Path.Combine(replicaFolderPath, sourceFileWithHash.Key), true);
+                    string replicaFilePath = Path.Combine(replicaFolderPath, sourceFileWithHash.Key);
+                    File.Copy(sourceFileWithHash.Value.FullFileName, replicaFilePath, true);
+                    Log.Information($"File in path '{replicaFilePath}' was updated in the 'replica' folder.");
                 }
                 else
                 {
@@ -113,6 +132,7 @@ namespace SyncFolders.Synchronization
                     }
 
                     File.Copy(sourceFileWithHash.Value.FullFileName, replicatedFilePath);
+                    Log.Information($"File in path '{replicatedFilePath}' was created in the 'replica' folder.");
                 }
             }
         }
@@ -129,6 +149,7 @@ namespace SyncFolders.Synchronization
 
                 // the file is not present in the 'source' folder so we will remove it from 'replica'
                 File.Delete(replicaFileWithHash.Value.FullFileName);
+                Log.Information($"File in path '{replicaFileWithHash.Value.FullFileName}' was removed from the 'replica' folder.");
             }
         }
 
@@ -147,7 +168,10 @@ namespace SyncFolders.Synchronization
                 string newSubDirectory = Path.Combine(replicaFolderPath, sourceSubDirectory.Key);
 
                 if (!Directory.Exists(newSubDirectory))
+                {
                     Directory.CreateDirectory(newSubDirectory);
+                    Log.Information($"Directory in path '{newSubDirectory}' was created in the 'replica' folder.");
+                }
             }
         }
 
@@ -163,7 +187,10 @@ namespace SyncFolders.Synchronization
 
                 // subdirectory is not present in the 'source' folder so we need to remove it from 'replica'
                 if (Directory.Exists(replicaSubDirectory.Value))
+                {
                     Directory.Delete(replicaSubDirectory.Value, true);
+                    Log.Information($"Directory in path '{replicaSubDirectory.Value}' was deleted in the 'replica' folder.");
+                }
             }
         }
     }
