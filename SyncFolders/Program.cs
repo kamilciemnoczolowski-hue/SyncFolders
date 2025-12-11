@@ -1,13 +1,18 @@
 ﻿using Serilog;
 using SyncFolders.Synchronization;
 
-int sleepInMiliseconds = 60000;
+ArgumentsVerifier argumentsVerifier = new(args);
+
+if (!argumentsVerifier.AreArgumentsValid(out string pathToSource, out string pathToReplica, out int interval, out string pathToLogFile))
+    return;
+
+int sleepInMiliseconds = interval;
 
 // logger configuration
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .WriteTo.Console()
-    .WriteTo.File("c://tmp/syncLoggger.txt", rollOnFileSizeLimit: true, fileSizeLimitBytes: 10 * 1024 * 1024) // rolling file size - limit set to 10MB
+    .WriteTo.File(pathToLogFile, rollOnFileSizeLimit: true, fileSizeLimitBytes: 10 * 1024 * 1024) // rolling file size - limit set to 10MB
     .CreateLogger();
 
 Synchronization synchronization = new();
@@ -17,8 +22,8 @@ Console.WriteLine("-------------------------------------------------------------
 while (true)
 {
     Console.WriteLine("Synchronization started!");
-    synchronization.Synchronize("C:\\tmp\\source", "C:\\tmp\\replica");
-    Console.WriteLine($"Synchronization finished! Waiting for the desired time interval = {sleepInMiliseconds / 1000} seconds...");
+    synchronization.Synchronize(pathToSource, pathToReplica);
+    Console.WriteLine($"Synchronization finished! Waiting the desired time interval = {sleepInMiliseconds / 1000} seconds for the next sync...");
     Console.WriteLine("------------------------------------------------------------------");
     Thread.Sleep(sleepInMiliseconds);
 }

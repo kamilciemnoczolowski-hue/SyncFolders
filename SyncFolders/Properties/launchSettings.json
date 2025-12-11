@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SyncFolders": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\tmp\\source C:\\tmp\\replica 30 C:\\tmp\\log.txt"
+    }
+  }
+}
